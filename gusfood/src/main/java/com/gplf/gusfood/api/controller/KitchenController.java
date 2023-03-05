@@ -43,7 +43,27 @@ public class KitchenController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Kitchen add (@RequestBody Kitchen kitchen) {
+    public Kitchen add(@RequestBody Kitchen kitchen) {
         return repository.save(kitchen);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Kitchen> edit(@PathVariable Long id, @RequestBody Kitchen kitchen) {
+
+        Optional<Kitchen> optionalOfKitchenFounded = repository.findById(id);
+
+        if (optionalOfKitchenFounded.isPresent()) {
+            Kitchen kitchenFounded = optionalOfKitchenFounded.get();
+
+            kitchenFounded.setName(kitchen.getName());
+
+            kitchenFounded = this.add(kitchenFounded);
+
+            return ResponseEntity.ok(kitchenFounded);
+        }
+
+        return ResponseEntity.notFound().build();
+
+    }
+
 }
