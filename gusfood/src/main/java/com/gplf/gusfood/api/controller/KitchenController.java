@@ -66,4 +66,22 @@ public class KitchenController {
 
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Kitchen> delete(@PathVariable Long id) {
+
+        Optional<Kitchen> optionalOfKitchenFounded = repository.findById(id);
+
+        if (optionalOfKitchenFounded.isPresent()) {
+            Kitchen kitchenFounded = optionalOfKitchenFounded.get();
+
+            repository.delete(kitchenFounded);
+
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.notFound().build();
+
+
+    }
+
 }
