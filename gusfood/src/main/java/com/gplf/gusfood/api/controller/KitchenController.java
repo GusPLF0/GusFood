@@ -1,8 +1,11 @@
 package com.gplf.gusfood.api.controller;
 
+import com.gplf.gusfood.domain.exception.EntityInUseException;
+import com.gplf.gusfood.domain.exception.EntityNotFoundException;
 import com.gplf.gusfood.domain.model.Kitchen;
 import com.gplf.gusfood.api.model.KitchensXmlWrapper;
 import com.gplf.gusfood.domain.repository.KitchenRepository;
+import com.gplf.gusfood.domain.service.KitchenService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,9 @@ public class KitchenController {
 
     @Autowired
     private KitchenRepository repository;
+
+    @Autowired
+    private KitchenService kitchenService;
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
     public KitchensXmlWrapper listXml() {
@@ -44,7 +50,7 @@ public class KitchenController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Kitchen add(@RequestBody Kitchen kitchen) {
-        return repository.save(kitchen);
+        return kitchenService.save(kitchen);
     }
 
     @PutMapping("/{id}")
@@ -68,19 +74,14 @@ public class KitchenController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Kitchen> delete(@PathVariable Long id) {
-
-        Optional<Kitchen> optionalOfKitchenFounded = repository.findById(id);
-
-        if (optionalOfKitchenFounded.isPresent()) {
-            Kitchen kitchenFounded = optionalOfKitchenFounded.get();
-
-            repository.delete(kitchenFounded);
-
+        try {
+            kitchenService.delete(id);
             return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (EntityInUseException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-
-        return ResponseEntity.notFound().build();
-
 
     }
 
