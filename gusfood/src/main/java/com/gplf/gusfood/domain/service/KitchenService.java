@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,11 +28,18 @@ public class KitchenService {
         try {
             Kitchen kitchenFounded = kitchenRepository.findById(id)
                     .orElseThrow(() -> new EntityNotFoundException("Kitchen with code " + id + " doesn't exists"));
-
             kitchenRepository.delete(kitchenFounded);
         } catch (DataIntegrityViolationException e) {
             throw new EntityInUseException("Kitchen with code " + id + " can't be removed because it's in use!");
         }
 
+    }
+
+    public List<Kitchen> findAll() {
+        return kitchenRepository.findAll();
+    }
+
+    public Kitchen find(Long id) {
+        return kitchenRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity with id " + id + " not found"));
     }
 }

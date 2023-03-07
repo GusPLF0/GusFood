@@ -21,30 +21,26 @@ import java.util.Optional;
 public class KitchenController {
 
     @Autowired
-    private KitchenRepository repository;
-
-    @Autowired
     private KitchenService kitchenService;
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
     public KitchensXmlWrapper listXml() {
-        return new KitchensXmlWrapper(repository.findAll());
+        return new KitchensXmlWrapper(kitchenService.findAll());
     }
 
     @GetMapping
     public List<Kitchen> list() {
-        return repository.findAll();
+        return kitchenService.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Kitchen> find(@PathVariable Long id) {
-        Optional<Kitchen> kitchenFounded = repository.findById(id);
-
-        if (kitchenFounded.isPresent()) {
-            return ResponseEntity.ok(kitchenFounded.get());
+        try {
+            Kitchen kitchen = kitchenService.find(id);
+            return ResponseEntity.ok(kitchen);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
-
-        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
@@ -55,21 +51,14 @@ public class KitchenController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Kitchen> edit(@PathVariable Long id, @RequestBody Kitchen kitchen) {
-
-        Optional<Kitchen> optionalOfKitchenFounded = repository.findById(id);
-
-        if (optionalOfKitchenFounded.isPresent()) {
-            Kitchen kitchenFounded = optionalOfKitchenFounded.get();
-
+        try {
+            Kitchen kitchenFounded = kitchenService.find(id);
             kitchenFounded.setName(kitchen.getName());
-
-            kitchenFounded = this.add(kitchenFounded);
-
+            kitchenService.save(kitchenFounded);
             return ResponseEntity.ok(kitchenFounded);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
-
-        return ResponseEntity.notFound().build();
-
     }
 
     @DeleteMapping("/{id}")
